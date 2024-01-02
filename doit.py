@@ -45,14 +45,14 @@ def setup_logger(stderr_log_lvl):
     return logging.getLogger("root")
 
 
-def child(loops, storing):
+def child(loops, cpu_load, storing):
     store = []
     store_once = " " * storing
     loop = 0
     while loop < loops:
-        # This simulates some actual workload
+        # This simulates some actual CPU workload
         inner = 0
-        while inner < 1000:
+        while inner < cpu_load:
             inner += 1
 
         loop += 1
@@ -68,12 +68,12 @@ def child(loops, storing):
     )
 
 
-def spawn(processes, loops, storing):
+def spawn(processes, loops, cpu_load, storing):
     logger = logging.getLogger("spawn")
     processes_list = list()
     for _ in range(processes):
         p = multiprocessing.Process(
-            target=child, kwargs={"loops": loops, "storing": storing}
+            target=child, kwargs={"loops": loops, "cpu_load": cpu_load, "storing": storing}
         )
         p.start()
         processes_list.append(p)
@@ -116,8 +116,8 @@ def main():
         type=int,
     )
     parser.add_argument(
-        "--inner",
-        help="How many loops should inner loop do",
+        "--cpu-load",
+        help="How many iterations should inner loop do per loop per process",
         default=1000,
         type=int,
     )
@@ -158,13 +158,13 @@ def main():
     if args.iterations == -1:
         while True:
             spawn(
-                processes=args.processes, loops=args.loops, storing=args.storing
+                processes=args.processes, loops=args.loops, cpu_load=args.cpu_load, storing=args.storing
             )
     else:
         for i in range(args.iterations):
             logging.debug(f"Starting iteration {i}")
             spawn(
-                processes=args.processes, loops=args.loops, storing=args.storing
+                processes=args.processes, loops=args.loops, cpu_load=args.cpu_load, storing=args.storing
             )
 
 
