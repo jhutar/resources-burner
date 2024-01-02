@@ -46,8 +46,12 @@ def setup_logger(stderr_log_lvl):
 
 
 def child(loops, cpu_load, storing):
+    logger = logging.getLogger("child")
+    logger.debug(f"Started child witl loops={loops} cpu_load={cpu_load} storing={storing}")
+
     store = []
     store_once = " " * storing
+
     loop = 0
     while loop < loops:
         # This simulates some actual CPU workload
@@ -55,9 +59,11 @@ def child(loops, cpu_load, storing):
         while inner < cpu_load:
             inner += 1
 
-        loop += 1
+        # This simulates some actual consumed memory
         # store.append(store_once)   # no copy if reusing the same string!
         store.append((str(loop) + store_once)[:storing])
+
+        loop += 1
 
     self_process = multiprocessing.current_process()
     psutil_process = psutil.Process(self_process.pid)
@@ -68,13 +74,16 @@ def child(loops, cpu_load, storing):
     )
 
 
-def spawn(processes, loops, cpu_load, storing):
+def spawn(args):
     logger = logging.getLogger("spawn")
     processes_list = list()
-    for _ in range(processes):
-        p = multiprocessing.Process(
-            target=child, kwargs={"loops": loops, "cpu_load": cpu_load, "storing": storing}
-        )
+    kwargs = {
+        "loops": args.loops,
+        "cpu_load": args.cpu_load,
+        "storing": args.storing,
+    }
+    for _ in range(args.processes):
+        p = multiprocessing.Process(target=child, kwargs=kwargs)
         p.start()
         processes_list.append(p)
         logger.debug(f"Started process {p}")
@@ -156,16 +165,15 @@ def main():
     )
 
     if args.iterations == -1:
+        i = 0
         while True:
-            spawn(
-                processes=args.processes, loops=args.loops, cpu_load=args.cpu_load, storing=args.storing
-            )
+            logging.debug(f"Starting iteration {i}")
+            spawn(args=args)
+            i += 1
     else:
         for i in range(args.iterations):
-            logging.debug(f"Starting iteration {i}")
-            spawn(
-                processes=args.processes, loops=args.loops, cpu_load=args.cpu_load, storing=args.storing
-            )
+            logging.debug(f"Starting iteration {i} of {args.iterations}")
+            spawn(args=args)
 
 
 if __name__ == "__main__":
