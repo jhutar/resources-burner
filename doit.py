@@ -45,12 +45,12 @@ def setup_logger(stderr_log_lvl):
     return logging.getLogger("root")
 
 
-def child(loops, cpu_load, storing):
+def child(loops, cpu_load, memory_load):
     logger = logging.getLogger("child")
-    logger.debug(f"Started child witl loops={loops} cpu_load={cpu_load} storing={storing}")
+    logger.debug(f"Started child witl loops={loops} cpu_load={cpu_load} memory_load={memory_load}")
 
     store = []
-    store_once = " " * storing
+    store_once = " " * memory_load
 
     loop = 0
     while loop < loops:
@@ -61,7 +61,7 @@ def child(loops, cpu_load, storing):
 
         # This simulates some actual consumed memory
         # store.append(store_once)   # no copy if reusing the same string!
-        store.append((str(loop) + store_once)[:storing])
+        store.append((str(loop) + store_once)[:memory_load])
 
         loop += 1
 
@@ -80,7 +80,7 @@ def spawn(args):
     kwargs = {
         "loops": args.loops,
         "cpu_load": args.cpu_load,
-        "storing": args.storing,
+        "memory_load": args.memory_load,
     }
     for _ in range(args.processes):
         p = multiprocessing.Process(target=child, kwargs=kwargs)
@@ -131,7 +131,7 @@ def main():
         type=int,
     )
     parser.add_argument(
-        "--storing",
+        "--memory-load",
         help="How many bytes to store per loop per process",
         default=10000,
         type=int,
