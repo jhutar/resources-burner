@@ -55,12 +55,20 @@ def child(**kwargs):
 
     if kwargs["disk_write_load"] > 0:
         write_load = b" " * kwargs["disk_write_load"]
-        write_path = kwargs["disk_write_destination"].replace("{i}", str(kwargs["iteration"])).replace("{p}", str(kwargs["process"]))
+        write_path = (
+            kwargs["disk_write_destination"]
+            .replace("{i}", str(kwargs["iteration"]))
+            .replace("{p}", str(kwargs["process"]))
+        )
         write_fd = open(write_path, "wb", buffering=kwargs["disk_buffer"])
 
     if kwargs["disk_read_load"] > 0:
         read_load = bytearray(kwargs["disk_read_load"])
-        read_path = kwargs["disk_read_source"].replace("{i}", str(kwargs["iteration"])).replace("{p}", str(kwargs["process"]))
+        read_path = (
+            kwargs["disk_read_source"]
+            .replace("{i}", str(kwargs["iteration"]))
+            .replace("{p}", str(kwargs["process"]))
+        )
         read_fd = open(read_path, "rb", buffering=kwargs["disk_buffer"])
         assert os.path.getsize(read_path) > 0, f"File {read_path} have to have size > 0"
 
@@ -73,7 +81,7 @@ def child(**kwargs):
 
         # This simulates some actual consumed memory
         # store.append(store_once)   # no copy if reusing the same string!
-        store.append((str(loop) + store_once)[:kwargs["memory_load"]])
+        store.append((str(loop) + store_once)[: kwargs["memory_load"]])
 
         # This simulated some actual disk write activity
         if kwargs["disk_write_load"] > 0:
