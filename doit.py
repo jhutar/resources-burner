@@ -98,11 +98,16 @@ def child(**kwargs):
 
     self_process = multiprocessing.current_process()
     psutil_process = psutil.Process(self_process.pid)
+
+    psutil_cpuinfo = psutil_process.cpu_times()
+    logging.info(f"CPU stats: {psutil_cpuinfo}")
+
     psutil_meminfo = psutil_process.memory_info()
     storage_size = pympler.asizeof.asizeof(store)
-    logging.info(
-        f"Used memory {psutil_meminfo} and storage itself had {storage_size} B"
-    )
+    logging.info(f"Memory stats: {psutil_meminfo} (storage: {storage_size})")
+
+    psutil_ioinfo = psutil_process.io_counters()
+    logging.info(f"IO stats: {psutil_ioinfo}")
 
 
 def spawn(args, iteration):
