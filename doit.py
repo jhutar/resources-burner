@@ -62,7 +62,7 @@ def child(**kwargs):
         read_load = bytearray(kwargs["disk_read_load"])
         read_path = kwargs["disk_read_source"].replace("{i}", str(kwargs["iteration"])).replace("{p}", str(kwargs["process"]))
         read_fd = open(read_path, "rb", buffering=kwargs["disk_buffer"])
-        assert os.path.getsize(kwargs["disk_read_source"]) > 0, "File to read have to have size > 0"
+        assert os.path.getsize(read_path) > 0, f"File {read_path} have to have size > 0"
 
     loop = 0
     while loop < kwargs["loops"]:
