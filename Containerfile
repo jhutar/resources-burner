@@ -11,7 +11,7 @@ RUN pip install -U pip \
     && pip install --no-cache-dir -r requirements.txt
 
 # Run the workload during build
-RUN python doit.py --iterations 1 --processes 8 --loops 1000000 --storing 100 -d
+RUN python doit.py --iterations 1 --processes 8 --loops 1000000 --memory-load 100 -d
 
 # Run the workload indefinetely at container run time
-CMD python doit.py --iterations -1 --processes 1 --loops 10000 --storing 1000 -v
+CMD python doit.py --iterations -1 --processes 1 --loops 10000 --memory-load 1000 -v
