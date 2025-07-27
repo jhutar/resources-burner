@@ -8,6 +8,7 @@ import logging
 import logging.handlers
 import time
 import os
+import statistics
 
 import pympler.asizeof
 
@@ -132,6 +133,7 @@ def spawn(args, iteration):
         "disk_read_source": args.disk_read_source,
         "disk_buffer": args.disk_buffer,
     }
+    time_start = time.perf_counter()
     for i in range(args.processes):
         kwargs.update({"process": i})
         p = multiprocessing.Process(target=child, kwargs=kwargs)
@@ -146,7 +148,9 @@ def spawn(args, iteration):
             logger.error(f"Process {p} failed with exit code {p.exitcode}")
         else:
             logger.info(f"Finished process {p} with exit code {p.exitcode}")
-    logger.info("All processes finished")
+    time_end = time.perf_counter()
+    logger.info(f"All processes finished. Iteration duration: {time_end - time_start}")
+    return time_end - time_start
 
 
 def main():
@@ -159,7 +163,7 @@ def main():
     )
     parser.add_argument(
         "--iterations",
-        help="How many times to do all of this, use -1 to do it indefinetely",
+        help="How many times to do all of this, use -1 to do it indefinitely",
         default=1,
         type=int,
     )
@@ -252,9 +256,11 @@ def main():
             spawn(args=args, iteration=i)
             i += 1
     else:
+        durations = []
         for i in range(args.iterations):
             logging.debug(f"Starting iteration {i} of {args.iterations}")
-            spawn(args=args, iteration=i)
+            durations.append(spawn(args=args, iteration=i))
+        logging.info(f"Duration of iterations: {durations}, average {statistics.mean(durations)}, stdev {statistics.stdev(durations) if len(durations) > 1 else None}")
 
 
 if __name__ == "__main__":
